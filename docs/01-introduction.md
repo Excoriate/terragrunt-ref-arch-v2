@@ -2,62 +2,144 @@
 
 ## Overview
 
-This repository provides a highly DRY (Don't Repeat Yourself) Terragrunt reference architecture designed for scalable infrastructure deployments across multiple environments. It offers a centralized, flexible, and reproducible infrastructure-as-code (IaC) approach.
+This reference architecture demonstrates how to build and manage complex infrastructure using Terragrunt, focusing on maintainability, reusability, and scalability. It provides a practical approach to organizing infrastructure code across multiple environments and cloud providers.
 
-## Key Features
+## Core Concepts
 
-- **Centralized Configuration**: All configuration is managed through YAML files in the `_ENVS` folder, allowing for easy environment-specific overrides
-- **DRY Terragrunt Architecture**: Minimizes code duplication while maintaining flexibility
-- **Multi-Provider Support**: Built-in support for multiple cloud providers with clean configuration management
-- **Environment-Specific Configurations**: Easy adaptation across different deployment environments
-- **Custom CLI Tool**: Includes `infractl` for configuration validation and management
-- **Hierarchical Stack Management**: Organized structure of stacks, layers, and components
+### Configuration Management
 
-## Why This Architecture?
+The architecture uses a centralized, flat YAML-based configuration system. Here's a comprehensive example from the `local.yaml` configuration:
 
-### Solving Common IaC Challenges
+```yaml
+# Root Configuration
+config:
+  version: "1.0.0"
+  last_updated: "2024-01-15"
+  description: "Centralized configuration for local environment"
 
-1. **Configuration Management**:
+# Git Configuration
+git:
+  base_url: "git::git@github.com:"
 
-   - Centralized YAML-based configuration
-   - Environment-specific overrides
-   - Clean separation of concerns
+# Product Identification
+product:
+  name: ref-arch
+  version: 0.0.1-local
+  description: "Reference architecture for cloud infrastructure - demo environment"
+  use_as_stack_tags: true
 
-2. **Code Reusability**:
+# Infrastructure as Code Configuration
+iac:
+  versions:
+    terraform_version_default: "1.9.8"
+    terragrunt_version_default: "0.62.1"
+  remote_state:
+    s3:
+      bucket: ${TF_STATE_BUCKET}
+      lock_table: ${TF_STATE_LOCK_TABLE}
+      region: us-east-1
 
-   - Shared components across stacks
-   - DRY configuration principles
-   - Modular design
+# Providers Configuration
+providers:
+  aws:
+    config:
+      access_key_id: ${AWS_ACCESS_KEY_ID:-secrets.aws.access_key_id}
+      secret_access_key: ${AWS_SECRET_ACCESS_KEY:-secrets.aws.secret_access_key}
+      region: us-east-1
+    version_constraints:
+      - name: aws
+        source: "hashicorp/aws"
+        required_version: "5.80.0"
+        enabled: true
 
-3. **Scalability**:
-   - Support for multiple environments
-   - Easy addition of new components
-   - Flexible provider configuration
+# Secrets Management
+secrets:
+  aws:
+    access_key: ${AWS_ACCESS_KEY_ID}
+    secret_key: ${AWS_SECRET_ACCESS_KEY}
+```
 
-### Benefits for Teams
+Key Configuration Properties:
 
-- **Reduced Complexity**: Clear separation of configuration and implementation
-- **Improved Maintainability**: Centralized configuration management
-- **Enhanced Collaboration**: Standardized structure and conventions
-- **Better Security**: Proper secrets management and environment separation
+- **`config`**: Global version and metadata
+- **`git`**: Repository configuration
+- **`product`**: Product identification and tagging
+- **`iac`**: Infrastructure as Code settings
+- **`providers`**: Cloud provider configurations
+- **`secrets`**: Secure secret management
 
-## Getting Started
+### Stack Organization
 
-To begin using this reference architecture:
+Infrastructure is organized into a hierarchical structure:
 
-1. Review the [Project Structure](02-project-structure.md)
-2. Understand the [Configuration System](03-configuration-system.md)
-3. Learn about the [CLI Tool](04-infractl-cli.md)
-4. Explore [Stack Management](05-stack-management.md)
+1. **Stacks**: Logical groupings of infrastructure
 
-## Prerequisites
+   - Represent a complete, deployable unit
+   - Composed of multiple layers
+   - Example: `stack-platform`, `stack-datastore`
 
-- Terraform (>= 1.9.8)
-- Terragrunt (>= 0.62.1)
-- Go (>= 1.20) for CLI tool
-- AWS CLI (configured with appropriate credentials)
-- Git
+2. **Layers**: Functional groupings within stacks
 
-## Next Steps
+   - Organize related infrastructure components
+   - Provide modular organization
+   - Example: `networking`, `compute`, `security`
 
-Continue to [Project Structure](02-project-structure.md) to understand the repository organization and key components.
+3. **Components**: Individual infrastructure resources
+   - Smallest deployable units
+   - Inherit from shared configurations
+   - Example: `vpc`, `eks-cluster`, `dynamodb-table`
+
+Detailed Stack Structure:
+
+```
+stack-platform/                 # Stack
+├── stack.hcl                  # Stack-wide configuration
+├── networking/                # Layer
+│   ├── layer.hcl             # Layer configuration
+│   ├── vpc/                  # Component
+│   │   ├── terragrunt.hcl    # Terragrunt configuration
+│   │   └── component.hcl     # Component settings
+│   └── subnets/              # Another component
+└── compute/                   # Another layer
+    └── eks/                  # EKS component
+```
+
+### Stack Configuration Example
+
+From a given configuration file, E.g. `local.yaml`, here's a stack configuration:
+
+```yaml
+stacks:
+  - name: stack-datastore
+    tags:
+      stack_purpose: demo-resource-generation
+    layers:
+      - name: db
+        tags:
+          layer_type: databases
+        components:
+          - name: id-generator
+            providers:
+              - "random"
+          - name: aws-dynamodb-table
+            providers:
+              - "aws"
+```
+
+### Provider Integration
+
+Multiple cloud providers are supported through a unified configuration:
+
+```yaml
+providers:
+  aws:
+    config:
+      region: us-east-1
+  random:
+    config: {} # No specific configuration needed
+    version_constraints:
+      - name: random
+        source: "hashicorp/random"
+        required_version: "3.6.3"
+        enabled: true
+```

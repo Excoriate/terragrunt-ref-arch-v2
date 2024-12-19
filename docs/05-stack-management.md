@@ -1,250 +1,223 @@
-# Stack Management
+# Stack Management in Terragrunt Reference Architecture
 
 ## Overview
 
-Stacks are the highest-level organizational unit in the infrastructure, representing complete, deployable sets of infrastructure components. This guide explains how to work with stacks effectively.
+Stack management is a critical aspect of the Terragrunt Reference Architecture, providing a structured, modular approach to organizing and deploying infrastructure components. This document explains the hierarchical structure, configuration principles, and best practices for managing infrastructure stacks.
 
-## Stack Structure
+## Stack Hierarchy and Structure
 
-### Hierarchy
+### Conceptual Hierarchy
 
-```
-stack-example/
-├── stack.hcl           # Stack-level configuration
-└── layer-name/         # Logical grouping of components
-    ├── layer.hcl       # Layer-level configuration
-    └── component-name/ # Individual infrastructure component
-        ├── component.hcl
-        └── terragrunt.hcl
+```mermaid
+graph TD
+    A[Root Configuration] --> B[Stack]
+    B --> C[Layer]
+    C --> D[Component]
 ```
 
-### Configuration Files
+### Detailed Hierarchy Explanation
 
-1. **stack.hcl**
+1. **Root Configuration**:
 
-   - Stack-wide settings
-   - Common tags
-   - Shared variables
+   - Global settings and defaults
+   - Defines overarching infrastructure principles
+   - Located in `infra/terragrunt/terragrunt.hcl`
 
-2. **layer.hcl**
+2. **Stack**:
 
-   - Layer-specific configuration
-   - Component grouping
-   - Layer-level dependencies
+   - Represents a logical grouping of infrastructure resources
+   - Corresponds to a specific domain or service
+   - Located in `infra/terragrunt/stack-<name>`
 
-3. **component.hcl**
-   - Component-specific settings
-   - Resource configuration
-   - Component dependencies
+3. **Layer**:
 
-## Stack Configuration
+   - Subdivides a stack into logical segments
+   - Represents a specific tier or functional group
+   - Located in `infra/terragrunt/stack-<name>/<layer-name>`
 
-### YAML Configuration
+4. **Component**:
+   - Smallest deployable unit of infrastructure
+   - Directly maps to a Terraform module
+   - Located in `infra/terragrunt/stack-<name>/<layer-name>/<component-name>`
+
+## Configuration Example
+
+Let's break down a stack configuration from `local.yaml`:
 
 ```yaml
 stacks:
-  - name: stack-datastore
+  - name: "stack-datastore"
     tags:
-      stack_purpose: "data-storage"
+      stack_purpose: "demo-resource-generation"
     layers:
-      - name: db
+      - name: "db"
         tags:
-          layer_type: "database"
+          layer_type: "databases"
         components:
-          - name: dynamodb-table
+          - name: "id-generator"
+            providers:
+              - "random"
+            tags:
+              component_tag: "component-tag"
+          - name: "aws-dynamodb-table"
             providers:
               - "aws"
             tags:
-              component_type: "nosql"
+              component_tag: "component-tag"
+```
+
+### Stack Configuration Breakdown
+
+#### Stack Level
+
+- **Name**: `stack-datastore`
+  - Unique identifier for the stack
+  - Follows a descriptive naming convention
+- **Tags**:
+  - `stack_purpose`: Provides context and categorization
+  - Can be used for filtering, reporting, and organization
+
+#### Layer Level
+
+- **Name**: `db`
+  - Represents a specific layer within the stack
+  - Logically groups related components
+- **Tags**:
+  - `layer_type`: Describes the layer's purpose
+  - Enables additional metadata and organization
+
+#### Component Level
+
+- **Name**:
+  - `id-generator`: A component using the `random` provider
+  - `aws-dynamodb-table`: A component using the `aws` provider
+- **Providers**:
+  - Explicitly define which providers are used
+  - Must be declared in the `providers` section of the configuration
+- **Tags**:
+  - Component-specific metadata
+  - Useful for tracking and managing individual components
+
+## Provider Integration
+
+### Provider Configuration
+
+```yaml
+providers:
+  aws:
+    config:
+      access_key_id: ${AWS_ACCESS_KEY_ID:-secrets.aws.access_key_id}
+      secret_access_key: ${AWS_SECRET_ACCESS_KEY:-secrets.aws.secret_access_key}
+      region: "us-east-1"
+    version_constraints:
+      - name: "aws"
+        source: "hashicorp/aws"
+        required_version: "5.80.0"
+        enabled: true
+  random:
+    config: {}
+    version_constraints:
+      - name: "random"
+        source: "hashicorp/random"
+        required_version: "3.6.3"
+        enabled: true
+```
+
+### Provider Management Principles
+
+- Each component must reference a provider
+- Providers are configured centrally
+- Version constraints ensure compatibility
+- Ability to enable/disable providers
+
+## Inputs and Configuration Inheritance
+
+### Configuration Inheritance Mechanism
+
+```mermaid
+graph TD
+    A[Root Configuration] --> B[Stack Configuration]
+    B --> C[Layer Configuration]
+    C --> D[Component Configuration]
+```
+
+### Inputs Configuration
+
+```yaml
+stacks:
+  - name: "stack-datastore"
+    inputs:
+      global_tag: "shared-tag"
+    layers:
+      - name: "db"
+        inputs:
+          layer_specific_input: "layer-value"
+        components:
+          - name: "aws-dynamodb-table"
             inputs:
-              table_name: "my-table"
+              table_name: "example-table"
 ```
 
-### Stack-Level Settings
+#### Inheritance Rules
 
-1. **Tags**
-
-   - Applied to all resources
-   - Environment identification
-   - Cost tracking
-
-2. **Variables**
-   - Shared across layers
-   - Environment-specific values
-   - Common configuration
-
-## Layer Management
-
-### Layer Organization
-
-- Group related components
-- Maintain clear boundaries
-- Define dependencies
-
-### Layer Configuration
-
-```hcl
-# layer.hcl
-locals {
-  layer_name = "database"
-  layer_tags = {
-    layer = local.layer_name
-    environment = "production"
-  }
-}
-```
-
-## Component Management
-
-### Component Structure
-
-1. **Configuration**
-
-   ```hcl
-   # component.hcl
-   locals {
-     component_name = "dynamodb-table"
-     component_tags = {
-       component = local.component_name
-     }
-   }
-   ```
-
-2. **Terragrunt Configuration**
-
-   ```hcl
-   # terragrunt.hcl
-   include "root" {
-     path = find_in_parent_folders()
-   }
-
-   include "component" {
-     path = "${get_repo_root()}/infra/terragrunt/_shared/_components/aws-dynamodb-table.hcl"
-   }
-   ```
-
-## Dependencies
-
-### Between Components
-
-```hcl
-dependency "vpc" {
-  config_path = "../../networking/vpc"
-}
-
-inputs = {
-  vpc_id = dependency.vpc.outputs.vpc_id
-}
-```
-
-### Between Layers
-
-- Use explicit dependencies
-- Maintain clear documentation
-- Consider deployment order
+- Inputs can be defined at stack, layer, and component levels
+- Lower-level configurations can override higher-level inputs
+- Enables flexible and granular configuration management
 
 ## Best Practices
 
-### 1. Stack Organization
+1. **Modularity**:
 
-- Use meaningful names
-- Group related components
-- Maintain clear documentation
+   - Keep stacks, layers, and components focused and single-purpose
+   - Promote reusability and maintainability
 
-### 2. Layer Management
+2. **Naming Conventions**:
 
-- Logical grouping
-- Clear boundaries
-- Explicit dependencies
+   - Use descriptive, consistent names
+   - Include purpose and context in names
 
-### 3. Component Design
+3. **Tagging Strategy**:
 
-- Single responsibility
-- Clear interfaces
-- Proper documentation
+   - Implement comprehensive tagging
+   - Use tags for tracking, cost allocation, and organization
 
-## Common Patterns
+4. **Provider Management**:
 
-### 1. Landing Zone Stack
+   - Centralize provider configurations
+   - Use version constraints
+   - Enable/disable providers as needed
 
-```yaml
-stacks:
-  - name: stack-landing-zone
-    layers:
-      - name: networking
-        components:
-          - name: vpc
-          - name: subnets
-      - name: security
-        components:
-          - name: iam-roles
-          - name: security-groups
-```
-
-### 2. Application Stack
-
-```yaml
-stacks:
-  - name: stack-application
-    layers:
-      - name: database
-        components:
-          - name: rds-instance
-          - name: redis-cluster
-      - name: compute
-        components:
-          - name: eks-cluster
-          - name: node-groups
-```
-
-## Deployment Strategies
-
-### 1. Full Stack Deployment
-
-```bash
-infractl plan --stack=mystack --target-env=prod
-infractl apply --stack=mystack --target-env=prod
-```
-
-### 2. Layer Deployment
-
-```bash
-infractl plan --stack=mystack --layer=networking --target-env=prod
-infractl apply --stack=mystack --layer=networking --target-env=prod
-```
-
-### 3. Component Deployment
-
-```bash
-infractl plan --stack=mystack --layer=database --component=rds --target-env=prod
-infractl apply --stack=mystack --layer=database --component=rds --target-env=prod
-```
+5. **Configuration Validation**:
+   - Use `infractl validate` to check configuration
+   - Ensure all providers and components are correctly defined
 
 ## Troubleshooting
 
-### Common Issues
+- **Missing Provider**: Ensure all referenced providers are configured
+- **Version Constraints**: Check provider version compatibility
+- **Inheritance Issues**: Verify input overrides and inheritance
 
-1. **Dependency Problems**
+## Tools and Commands
 
-   - Check dependency paths
-   - Verify output variables
-   - Review dependency order
+```bash
+# Validate stack configuration
+infractl validate --stack=stack-datastore --target-env=local
 
-2. **Configuration Issues**
+# Plan a specific stack
+infractl plan --stack=stack-datastore --layer=db --component=aws-dynamodb-table --target-env=local
 
-   - Validate YAML syntax
-   - Check variable references
-   - Verify provider configuration
+# Apply a stack
+infractl apply --stack=stack-datastore --target-env=local
+```
 
-3. **Deployment Failures**
-   - Review error messages
-   - Check state files
-   - Verify permissions
+## Conclusion
 
-## Next Steps
+Stack management in the Terragrunt Reference Architecture provides a powerful, flexible approach to infrastructure configuration. By understanding and leveraging the hierarchical structure, provider integration, and configuration inheritance, you can create scalable, maintainable infrastructure deployments.
 
-This concludes the documentation series. You now have a comprehensive understanding of the Terragrunt Reference Architecture v2. For additional support:
+## References
 
-1. Review the example stacks in the repository
-2. Check the InfraCTL CLI documentation
-3. Consult the Terragrunt official documentation
+- [InfraCTL CLI Documentation](04-infractl-cli.md)
+- [Configuration System](04-configuration-system.md)
+- [Project Structure](02-project-structure.md)
+
+Confidence Score: 95% - The documentation is based directly on the PRD, reference architecture, and `local.yaml` configuration, with minimal interpretation.

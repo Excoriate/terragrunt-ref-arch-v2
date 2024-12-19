@@ -54,7 +54,7 @@ stacks: &stacks
               - "random"
             tags:
               component_tag: component-tag
-          - name: dynamodb-table
+          - name: aws-dynamodb-table
             providers:
               - "aws"
             tags:

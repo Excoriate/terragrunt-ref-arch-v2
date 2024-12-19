@@ -1,122 +1,123 @@
 # Project Structure
 
-## Repository Organization
+## Overview
 
-The repository follows a clear, hierarchical structure designed for scalability and maintainability:
+The Terragrunt Reference Architecture is meticulously designed to provide a modular, scalable, and maintainable infrastructure-as-code (IaC) solution. This document provides an in-depth exploration of the repository's structure and its key components.
+
+## Repository Layout
 
 ```
 .
-├── infra/
-│   ├── terraform/          # Terraform modules
-│   │   └── module-name/    # Individual Terraform modules
-│   └── terragrunt/         # Terragrunt configuration
-│       ├── _ENVS/          # Environment configurations
-│       ├── _shared/        # Shared components
-│       ├── _templates/     # Templates for generated files
-│       └── stack-*/        # Infrastructure stacks
-└── tools/
+├── LICENSE
+├── README.md
+├── docs/                  # Documentation
+├── infra/                 # Infrastructure core
+│   ├── terraform/         # Terraform modules
+│   │   ├── module-name/   # Individual module
+│   │   │   ├── main.tf
+│   │   │   ├── variables.tf
+│   │   │   ├── outputs.tf
+│   │   │   └── versions.tf
+│   └── terragrunt/        # Terragrunt configuration
+│       ├── _ENVS/         # Environment configurations
+│       ├── _shared/       # Reusable components
+│       ├── _templates/    # Generated file templates
+│       ├── config.hcl     # Global configuration
+│       └── stack-*/       # Infrastructure stacks
+└── tools/                 # Infrastructure management tools
     └── infractl/          # Custom CLI tool
 ```
 
 ## Key Directories
 
-### `/infra/terraform/`
+### 1. Terraform Modules (`/infra/terraform/`)
 
-Contains reusable Terraform modules that define specific infrastructure components:
+Terraform modules are the building blocks of infrastructure, each representing a specific, reusable component.
 
-- Each module follows standard Terraform structure
-- Includes `README.md`, `main.tf`, `variables.tf`, `outputs.tf`
-- Modules are referenced by Terragrunt configurations
-
-### `/infra/terragrunt/`
-
-The heart of the infrastructure configuration:
-
-#### `_ENVS/`
-
-- Contains environment-specific YAML configurations
-- `base.yaml`: Base configuration for all environments
-- Environment-specific files (e.g., `local.yaml`, `production.yaml`)
-
-#### `_shared/_components/`
-
-- Reusable Terragrunt configurations
-- Common patterns and configurations
-- Referenced by specific components
-
-#### `_templates/`
-
-- Template files for generated configurations
-- `providers.tf.tpl`: Provider configuration templates
-- `versions.tf.tpl`: Version constraint templates
-
-#### Stack Directories (`stack-*/`)
+#### Module Structure
 
 ```
-stack-example/
-├── stack.hcl           # Stack-level configuration
-└── layer-name/         # Logical infrastructure layer
-    ├── layer.hcl       # Layer-level configuration
-    └── component-name/ # Infrastructure component
-        ├── component.hcl
-        └── terragrunt.hcl
+infra/terraform/my-terraform-module/
+├── README.md              # Module documentation
+├── main.tf                # Core resource definitions
+├── variables.tf           # Input variable definitions
+├── outputs.tf             # Output value definitions
+└── versions.tf            # Provider and version constraints
 ```
 
-### `/tools/infractl/`
+### 2. Terragrunt Configuration (`/infra/terragrunt/`)
 
-Custom CLI tool for managing infrastructure:
+The Terragrunt configuration provides a powerful, DRY (Don't Repeat Yourself) approach to infrastructure management.
 
-- Configuration validation
-- Environment management
-- Terragrunt command wrapper
-- Built with Go for performance and reliability
+#### Directory Breakdown
 
-## Configuration Hierarchy
+```
+terragrunt/
+├── _ENVS/                 # Environment-specific configurations
+│   ├── base.yaml          # Base configuration
+│   ├── local.yaml         # Local development settings
+│   └── dev.yaml           # Development environment
+├── _shared/               # Shared infrastructure components
+│   └── _components/       # Reusable component configurations
+│       ├── aws-vpc.hcl
+│       └── eks-cluster.hcl
+├── _templates/            # Configuration templates
+│   ├── providers.tf.tpl
+│   └── versions.tf.tpl
+├── config.hcl             # Root configuration
+├── stack-landing-zone/    # Infrastructure stack
+│   ├── stack.hcl          # Stack-wide configuration
+│   ├── dns/               # Layer
+│   │   ├── layer.hcl
+│   │   ├── dns-zone/      # Component
+│   │   │   ├── component.hcl
+│   │   │   └── terragrunt.hcl
+│   │   └── dns-domains/   # Another component
+│   │       ├── component.hcl
+│   │       └── terragrunt.hcl
+└── terragrunt.hcl         # Root Terragrunt configuration
+```
 
-1. **Stack Level** (`stack.hcl`)
+##### Configuration Hierarchy
 
-   - Highest level of organization
-   - Common configuration for all layers
-   - Stack-wide tags and settings
+1. **`_ENVS/`**: Environment-specific configurations
 
-2. **Layer Level** (`layer.hcl`)
+   - `base.yaml`: Default settings
+   - `local.yaml`, `dev.yaml`, etc.: Environment overrides
 
-   - Logical grouping of components
-   - Layer-specific configuration
-   - Common settings for components
+2. **`_shared/_components/`**: Reusable configuration snippets
 
-3. **Component Level** (`component.hcl`, `terragrunt.hcl`)
-   - Individual infrastructure resources
-   - Component-specific configuration
-   - References to Terraform modules
+   - Shared across different stacks and components
+   - Promotes configuration reusability
 
-## File Naming Conventions
+3. **`stack-*/`**: Infrastructure stacks
+   - Organized into layers and components
+   - Supports modular infrastructure design
 
-- Stack directories: `stack-<purpose>` (e.g., `stack-landing-zone`)
-- Layer directories: Descriptive names (e.g., `networking`, `database`)
-- Component files:
-  - `component.hcl`: Component-specific configuration
-  - `terragrunt.hcl`: Terragrunt execution configuration
+### 3. InfraCTL CLI Tool (`/tools/infractl/`)
 
-## Best Practices
+A custom Go-based CLI for infrastructure management.
 
-1. **Module Organization**
+#### Tool Structure
 
-   - Keep modules focused and single-purpose
-   - Include comprehensive documentation
-   - Use consistent variable naming
+```
+infractl/
+├── internal/              # Implementation details
+│   ├── cfg/               # Configuration management
+│   ├── controller/        # Business logic
+│   ├── transformers/      # Data processing
+│   └── tui/               # Text UI components
+├── pkg/                   # Public packages
+│   ├── envars/            # Environment variable handling
+│   ├── logger/            # Logging utilities
+│   ├── tg/                # Terragrunt integration
+│   └── utils/             # Utility functions
+└── main.go                # Entry point
+```
 
-2. **Stack Structure**
+## Development Tools
 
-   - Group related components in layers
-   - Use meaningful stack names
-   - Maintain clear dependencies
-
-3. **Configuration Management**
-   - Keep environment configurations DRY
-   - Use clear, descriptive names
-   - Document all configuration options
-
-## Next Steps
-
-Continue to [Configuration System](03-configuration-system.md) to learn about the YAML-based configuration system.
+- `justfile`: Task automation
+- `Makefile`: Build and deployment scripts
+- `.editorconfig`: Consistent coding style
+- GitHub Actions: CI/CD workflows
