@@ -1,0 +1,23 @@
+feature: ['feature/*', 'enhancement/*']
+bug: ['fix/*', 'bugfix/*', 'bug/*']
+documentation: ['docs/*', 'readme/*']
+performance: ['perf/*', 'optimize/*']
+dependencies: ['deps/*', 'upgrade/*']
+
+# Infrastructure-specific labels
+infra/terragrunt: ['infra/terragrunt/*']
+infra/terraform: ['infra/terraform/*']
+tool/infractl: ['tool/infractl/*']
+
+# Maintenance and configuration
+maintenance: ['chore/*', 'config/*']
+ci: ['ci/*', 'workflow/*']
+
+# Breaking changes
+breaking: ['breaking/*', 'major/*']
+
+# Release preparation
+release: ['release/*', 'prep/*']
+
+# Test-related changes
+tests: ['test/*', 'testing/*']

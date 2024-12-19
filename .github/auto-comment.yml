@@ -1,0 +1,19 @@
+---
+pullRequestOpened: |-
+  :wave: Thanks for contributing to aws-taggy!
+  
+  Before we can merge this PR, please ensure:
+  - [ ] Added/updated tests for new functionality
+  - [ ] Followed Go best practices and linting rules
+  - [ ] Updated documentation for new features
+  - [ ] Verified AWS tag compliance logic
+  - [ ] Checked performance impact on large AWS resource sets
+  - [ ] Reviewed changes for security implications
+  - [ ] Linked to relevant issue (if applicable)
+
+  AWS Tagging Specific Checklist:
+  - [ ] Validated tag key/value constraints
+  - [ ] Tested with multiple AWS resource types
+  - [ ] Considered multi-account/region scenarios
+
+  Thank you for improving aws-taggy! 🚀

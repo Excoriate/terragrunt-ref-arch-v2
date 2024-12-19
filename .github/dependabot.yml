@@ -1,0 +1,55 @@
+---
+version: 2
+updates:
+  # Go dependencies
+  - package-ecosystem: "gomod"
+    directory: "/tools/infractl"
+    schedule:
+      interval: "weekly"
+    groups:
+      go-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "go"
+
+  # Terraform and Terragrunt dependencies
+  - package-ecosystem: "terraform"
+    directory: "/infra/terraform"
+    schedule:
+      interval: "weekly"
+    groups:
+      terraform-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "terraform"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions-dependencies:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "ci"
+
+  # Markdown and documentation
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    groups:
+      docs-dependencies:
+        patterns:
+          - "remark"
+          - "markdown"
+    labels:
+      - "dependencies"
+      - "docs"

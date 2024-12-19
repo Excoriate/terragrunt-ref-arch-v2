@@ -1,0 +1,22 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Go files
+*.go text diff=golang
+go.mod text diff=golang
+go.sum text diff=golang
+
+# Binary files
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# Documentation
+*.md text diff=markdown
+
+# Ignore specific files in export
+.github export-ignore
+.gitignore export-ignore
+.golangci.yml export-ignore
+.pre-commit-config.yaml export-ignore

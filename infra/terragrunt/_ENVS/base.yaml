@@ -1,0 +1,105 @@
+# Root Configuration
+config:
+  version: "1.0.0"
+  last_updated: "2024-01-15"
+  description: "Base configuration for infrastructure"
+
+# Centralized Base Environment Configuration
+git: &git
+  base_url: "git::git@github.com:"
+  terraform_modules_local_path: "modules"
+
+# Global Product Identification
+product: &product
+  name: seko-saas
+  version: "0.0.1"
+  description: "SaaS platform base configuration"
+
+# Environment Configuration
+environment: &env
+  name: dev
+  type: development
+  dns:
+    zone_name: example.ai
+
+# Top-Level Stacks Configuration
+stacks: &stacks
+  - name: landing-zone
+    tags:
+      base_tag: base-stack-tag
+    layers:
+      - name: dns
+        tags:
+          base_layer_tag: base-layer-tag
+        components:
+          - name: dns-zone
+            providers:
+              - "cloudflare"
+            tags:
+              base_component_tag: base-component-tag
+
+# Providers Configuration
+providers: &providers
+  aws: &aws
+    config:
+      access_key_id: ${AWS_ACCESS_KEY_ID:-secrets.aws.access_key_id}
+      secret_access_key: ${AWS_SECRET_ACCESS_KEY:-secrets.aws.secret_access_key}
+      region: us-east-1
+    version_constraint:
+      source: "hashicorp/aws"
+      required_version: "5.0.0"
+      enabled: true
+  cloudflare: &cloudflare
+    config:
+      api_token: ${CLOUDFLARE_API_TOKEN:-secrets.cloudflare.api_token}
+    version_constraint:
+      source: "cloudflare/cloudflare"
+      required_version: "5.0.0"
+      enabled: true
+  github: &github
+    config:
+      token: ${GITHUB_TOKEN:-secrets.github.token}
+      owner: ${GITHUB_OWNER:-secrets.github.owner}
+    version_constraint:
+      source: "integrations/github"
+      required_version: "5.0.0"
+      enabled: true
+  namecheap: &namecheap
+    config:
+      api_key: ${NAMECHEAP_API_KEY:-secrets.namecheap.api_key}
+    user_name: ${NAMECHEAP_USERNAME:-secrets.namecheap.user_name}
+    api_user: ${NAMECHEAP_API_USER:-secrets.namecheap.api_user}
+    use_sandbox: ${NAMECHEAP_USE_SANDBOX:-false}
+    version_constraint:
+      source: "integrations/namecheap"
+      required_version: "1.0.0"
+      enabled: true
+
+# Secrets Management
+secrets: &secrets
+  cloudflare:
+    api_key: ${CLOUDFLARE_API_KEY}
+    email: ${CLOUDFLARE_EMAIL}
+    account_id: ${CLOUDFLARE_ACCOUNT_ID}
+  github:
+    token: ${GITHUB_TOKEN}
+    owner: ${GITHUB_OWNER}
+  aws:
+    access_key_id: ${AWS_ACCESS_KEY_ID}
+    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+  namecheap:
+    api_key: ${NAMECHEAP_API_KEY}
+    user_name: ${NAMECHEAP_USERNAME}
+    api_user: ${NAMECHEAP_API_USER}
+    use_sandbox: ${NAMECHEAP_USE_SANDBOX}
+
+# Infrastructure as Code Configuration
+iac: &iac
+  terraform:
+    global_version: "1.9.8"
+    remote_state:
+      backend:
+        type: s3
+        bucket: terraform-state-makemyinfra
+        lock_table: terraform-state-makemyinfra
+        region: us-east-1

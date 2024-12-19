@@ -1,0 +1,110 @@
+# Root Configuration
+config:
+  version: "1.0.0"
+  last_updated: "2024-01-15"
+  description: "Centralized configuration for local environment"
+
+# Centralized Local Environment Configuration
+git: &git
+  base_url: "git::git@github.com:"
+  # In case of terraform modules located in the same repository, specify the path to the modules folder
+  # This path is relative to the root of the repository
+  terraform_modules_local_path: "terraform"
+
+# Global Product Identification
+product: &product
+  name: seko-saas
+  version: 0.0.1-local
+  description: "SaaS platform for enhanced productivity"
+  use_as_stack_tags: true
+
+# Infrastructure as Code Configuration
+iac: &iac
+  versions:
+    terraform_version_default: "1.9.8"
+    terragrunt_version_default: "0.62.1"
+  remote_state:
+    s3:
+      bucket: terraform-state-makemyinfra
+      lock_table: terraform-state-makemyinfra
+      region: us-east-1
+
+# Top-Level Stacks Configuration
+stacks: &stacks
+  - name: stack-landing-zone
+    tags:
+      random_tag: stack-tag
+    layers:
+      - name: dns
+        tags:
+          layer_tag: layer-tag
+        components:
+          - name: dns-zone
+            providers:
+              - "cloudflare"
+            tags:
+              component_tag: component-tag
+
+# New Top-Level Providers Configuration
+providers: &providers
+  aws: &aws
+    config:
+      access_key_id: ${AWS_ACCESS_KEY_ID:-secrets.aws.access_key_id}
+      secret_access_key: ${AWS_SECRET_ACCESS_KEY:-secrets.aws.secret_access_key}
+      region: us-east-1
+    version_constraints:
+      - name: aws
+        source: "hashicorp/aws"
+        required_version: "5.80.0"
+        enabled: true
+      - name: terraform
+        source: "hashicorp/terraform"
+        required_version: "1.9.8"
+        enabled: true
+  cloudflare: &cloudflare
+    config:
+      api_key: ${CLOUDFLARE_API_KEY:-secrets.cloudflare.api_key}
+      email: ${CLOUDFLARE_EMAIL:-secrets.cloudflare.email}
+    version_constraints:
+      - name: cloudflare
+        source: "cloudflare/cloudflare"
+        required_version: "5.0.0-alpha1"
+        enabled: true
+  github: &github
+    config:
+      token: ${GITHUB_TOKEN_LOCAL:-secrets.github.token}
+      owner: ${GITHUB_OWNER:-secrets.github.owner}
+    version_constraints:
+      - name: github
+        source: "integrations/github"
+        required_version: "6.4.0"
+        enabled: true
+  namecheap: &namecheap
+    config:
+      api_key: ${NAMECHEAP_API_KEY:-secrets.namecheap.api_key}
+      user_name: ${NAMECHEAP_USERNAME:-secrets.namecheap.user_name}
+      api_user: ${NAMECHEAP_API_USER:-secrets.namecheap.api_user}
+      use_sandbox: ${NAMECHEAP_USE_SANDBOX:-true}
+    version_constraints:
+      - name: namecheap
+        source: "namecheap/namecheap"
+        required_version: "2.2.0"
+        enabled: true
+
+# Secrets Management
+secrets: &secrets
+  cloudflare:
+    api_key: ${CLOUDFLARE_API_KEY}
+    email: ${CLOUDFLARE_EMAIL}
+  github:
+    token: ${GITHUB_TOKEN}
+    owner: ${GITHUB_OWNER}
+  aws:
+    access_key_id: ${AWS_ACCESS_KEY_ID}
+    secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+  namecheap:
+    api_key: ${NAMECHEAP_API_KEY}
+    user_name: ${NAMECHEAP_USERNAME}
+    api_user: ${NAMECHEAP_API_USER}
+    use_sandbox: ${NAMECHEAP_USE_SANDBOX}
+
