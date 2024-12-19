@@ -11,11 +11,11 @@ variable "generation_key" {
 }
 
 variable "uuid_format" {
-  description = "Optional format string for the UUID (e.g., 'custom-%s')"
+  description = "Format specifier for UUID generation"
   type        = string
-  default     = ""
+  default     = "%s"  # Standard UUID format
   validation {
-    condition     = can(format(var.uuid_format, "test"))
+    condition     = can(format(var.uuid_format, "test-uuid"))
     error_message = "Invalid UUID format string. Must be a valid format specifier."
   }
 }

@@ -10,15 +10,15 @@ output "table_arn" {
 
 output "generated_name" {
   description = "The generated name from the name generator"
-  value       = module.table_name.full_resource_name
+  value       = var.generated_name
 }
 
 output "generated_id" {
   description = "The generated UUID from the ID generator"
-  value       = module.table_id.full_uuid
+  value       = var.generated_id
 }
 
 output "generated_quota" {
   description = "The generated quota from the quota generator"
-  value       = module.table_quota.adjusted_quota
+  value       = var.generated_quota
 }

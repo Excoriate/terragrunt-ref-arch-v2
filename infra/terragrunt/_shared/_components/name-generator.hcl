@@ -8,4 +8,7 @@ locals {
 }
 
 inputs = {
+  prefix_length = 8
+  prefix_type   = "generic"
+  name_template = "%s-resource"
 }

@@ -8,4 +8,9 @@ locals {
 }
 
 inputs = {
+  id_type       = "generic"
+  generation_key = null
+  uuid_format   = "%s"
+  uuid_prefix   = ""
+  uuid_suffix   = ""
 }
