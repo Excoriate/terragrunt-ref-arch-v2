@@ -100,22 +100,34 @@ Explore our comprehensive documentation to understand the architecture and usage
    - Directory layout
    - Configuration hierarchy
 
-3. [Configuration System](docs/04-configuration-system.md)
+3. [Design Principles](docs/03-design-principles.md)
+
+   - Architectural philosophy
+   - Key design considerations
+   - Guiding development principles
+
+4. [Configuration System](docs/04-configuration-system.md)
 
    - Configuration management
    - Environment-specific settings
-   - Compilation process
+   - YAML configuration details
 
-4. [Stack Management](docs/05-stack-management.md)
+5. [InfraCTL CLI](docs/04-infractl-cli.md)
+
+   - Command-line tool usage
+   - Configuration validation
+   - Infrastructure deployment commands
+
+6. [Stack Management](docs/05-stack-management.md)
 
    - Infrastructure stack organization
    - Layer and component management
    - Provider integration
 
-5. [InfraCTL CLI](docs/04-infractl-cli.md)
-   - Command-line tool usage
+7. [Configuration Compilation](docs/06-configuration-compilation.md)
+   - Detailed compilation process
    - Configuration validation
-   - Infrastructure deployment commands
+   - Environment variable and secret resolution
 
 ## 🤝 Contributing
 
