@@ -22,7 +22,7 @@ include "cfg" {
 # located at: `_shared/_components/quota-generator.hcl`. This ensures that changes are reflected
 # across all modules that utilize this shared configuration.
 include "shared" {
-  path = "${get_terragrunt_dir()}/../../../_shared/_components/name-generator.hcl"  # Path to the shared component configuration
+  path = "${get_terragrunt_dir()}/../../../_shared/_components/aws-dynamodb-table.hcl"  # Path to the shared component configuration
   expose = true  # Exposes the included configuration to child modules
   merge_strategy = "deep"  # Merges the shared configuration deeply with local configurations
 }
@@ -42,12 +42,12 @@ locals {
   # These local variables dynamically construct the source path for Terraform modules.
   # They support both local and remote module sources with flexible versioning.
   terraform_module_name = local.component_cfg.locals.name  # Name of the component
-  terraform_modules_local_path = "../../../../terraform/name-generator"  # Local path to the Terraform module
+  terraform_modules_local_path = "../../../../terraform/aws-dynamodb-table"  # Local path to the Terraform module
   terraform_module_remote_path = ""  # Placeholder for remote module path
 
   # 🔗 Source Path Resolution Strategy
   # This local variable determines the source path for the Terraform module.
-  # - If no remote path is provided, it uses the local path combined with the module name (e.g., "name-generator").
+  # - If no remote path is provided, it uses the local path combined with the module name (e.g., "aws-dynamodb-table").
   # - If a remote path exists, it formats the source using the base URL, remote path, and version.
   terraform_modules_source_path = local.terraform_module_remote_path == "" ? local.terraform_modules_local_path : format("%s/%s?ref=%s", local.base_url, local.terraform_module_remote_path, local.upstream_tf_module_version)
 
