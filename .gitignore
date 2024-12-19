@@ -92,10 +92,6 @@ Cargo.lock
 *.tfplan
 crash.log
 crash.*.log
-.infra-cache
-.infra-cache/*
-.infractl-cache
-.infractl-cache/*
 
 tools/infractl/target/*
 **/*.exe
@@ -105,3 +101,9 @@ tools/infractl/target/*
 **/*.dylib
 **/*.out
 
+.infractl-cache
+.infractl-cache/*
+infra/.infractl-cache
+infra/.infractl-cache/*
+tools/infractl/target/infractl
+tools/infractl/infractl

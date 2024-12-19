@@ -23,9 +23,11 @@ var (
 
 	// gitignore entries for the infrastructure cache directory
 	InfraCtlGitIgnoreEntries = []string{
-		".infractl-cache/",  // Standard directory ignore
-		".infractl-cache",   // Exact match for file/directory
-		".infractl-cache/*", // Contents of immediate directory
-		"infractl",          // infractl binary
+		".infractl-cache/",               // Ignore the cache directory
+		".infractl-cache/*",              // Ignore contents of cache directory
+		"infra/.infractl-cache/",         // Fully qualified path for infra cache
+		"infra/.infractl-cache/*",        // Contents of infra cache
+		"tools/infractl/target/infractl", // Specific binary in target directory
+		"tools/infractl/infractl",        // Binary in infractl directory
 	}
 )

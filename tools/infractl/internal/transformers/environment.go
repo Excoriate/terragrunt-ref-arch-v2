@@ -174,15 +174,13 @@ func (t *EnvVarsTransformer) GetUpdatedConfig() (*cfg.EnvConfig, error) {
 
 	// Expand Git section
 	gitMap, err := t.expandMapStringInterface(map[string]interface{}{
-		"base_url":                     t.EnvConfig.Git.BaseURL,
-		"terraform_modules_local_path": t.EnvConfig.Git.TerraformModulesLocalPath,
+		"base_url": t.EnvConfig.Git.BaseURL,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("expanding git section: %w", err)
 	}
 	updatedConfig.Git = cfg.Git{
-		BaseURL:                   gitMap["base_url"].(string),
-		TerraformModulesLocalPath: gitMap["terraform_modules_local_path"].(string),
+		BaseURL: gitMap["base_url"].(string),
 	}
 
 	// Expand Product section
@@ -322,7 +320,6 @@ func (t *EnvVarsTransformer) ValidateEnvironmentVariables() error {
 
 	// Git section
 	checkVar(t.EnvConfig.Git.BaseURL)
-	checkVar(t.EnvConfig.Git.TerraformModulesLocalPath)
 
 	// Product section
 	checkVar(t.EnvConfig.Product.Name)

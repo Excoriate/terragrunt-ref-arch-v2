@@ -41,6 +41,9 @@ stacks: &stacks
               - "random"
             tags:
               component_tag: component-tag
+            # These terraform variables, set and/or overrides the values set for a given terraform module
+            inputs:
+              random_string_length: 10
           - name: quota-generator
             providers:
               - "random"

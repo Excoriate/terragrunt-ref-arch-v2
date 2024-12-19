@@ -58,23 +58,26 @@ type Secrets map[string]map[string]string
 
 // ComponentConfig represents a single component configuration
 type ComponentConfig struct {
-	Name      string            `yaml:"name" json:"name"`
-	Providers []string          `yaml:"providers" json:"providers"`
-	Tags      map[string]string `yaml:"tags" json:"tags"`
+	Name      string                 `yaml:"name" json:"name"`
+	Providers []string               `yaml:"providers" json:"providers"`
+	Tags      map[string]string      `yaml:"tags" json:"tags"`
+	Inputs    map[string]interface{} `yaml:"inputs,omitempty" json:"inputs,omitempty"`
 }
 
 // LayerConfig represents a layer configuration within a stack
 type LayerConfig struct {
-	Name       string            `yaml:"name" json:"name"`
-	Tags       map[string]string `yaml:"tags" json:"tags"`
-	Components []ComponentConfig `yaml:"components" json:"components"`
+	Name       string                 `yaml:"name" json:"name"`
+	Tags       map[string]string      `yaml:"tags" json:"tags"`
+	Components []ComponentConfig      `yaml:"components" json:"components"`
+	Inputs     map[string]interface{} `yaml:"inputs,omitempty" json:"inputs,omitempty"`
 }
 
 // StackConfig represents a stack configuration
 type StackConfig struct {
-	Name   string            `yaml:"name" json:"name"`
-	Tags   map[string]string `yaml:"tags" json:"tags"`
-	Layers []LayerConfig     `yaml:"layers" json:"layers"`
+	Name   string                 `yaml:"name" json:"name"`
+	Tags   map[string]string      `yaml:"tags" json:"tags"`
+	Layers []LayerConfig          `yaml:"layers" json:"layers"`
+	Inputs map[string]interface{} `yaml:"inputs,omitempty" json:"inputs,omitempty"`
 }
 
 // VersionConstraint represents the version constraint configuration for a provider
