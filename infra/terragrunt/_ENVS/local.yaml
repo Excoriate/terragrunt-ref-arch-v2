@@ -7,15 +7,12 @@ config:
 # Centralized Local Environment Configuration
 git: &git
   base_url: "git::git@github.com:"
-  # In case of terraform modules located in the same repository, specify the path to the modules folder
-  # This path is relative to the root of the repository
-  terraform_modules_local_path: "terraform"
 
 # Global Product Identification
 product: &product
-  name: seko-saas
+  name: ref-arch
   version: 0.0.1-local
-  description: "SaaS platform for enhanced productivity"
+  description: "Reference architecture for cloud infrastructure - demo environment"
   use_as_stack_tags: true
 
 # Infrastructure as Code Configuration
@@ -25,23 +22,38 @@ iac: &iac
     terragrunt_version_default: "0.62.1"
   remote_state:
     s3:
-      bucket: terraform-state-makemyinfra
-      lock_table: terraform-state-makemyinfra
+      bucket: ${TF_STATE_BUCKET}
+      lock_table: ${TF_STATE_LOCK_TABLE}
       region: us-east-1
 
 # Top-Level Stacks Configuration
 stacks: &stacks
-  - name: stack-landing-zone
+  - name: stack-datastore
     tags:
-      random_tag: stack-tag
+      stack_purpose: demo-resource-generation
     layers:
-      - name: dns
+      - name: db
         tags:
-          layer_tag: layer-tag
+          layer_type: databases
         components:
-          - name: dns-zone
+          - name: id-generator
             providers:
-              - "cloudflare"
+              - "random"
+            tags:
+              component_tag: component-tag
+          - name: quota-generator
+            providers:
+              - "random"
+            tags:
+              component_tag: component-tag
+          - name: name-generator
+            providers:
+              - "random"
+            tags:
+              component_tag: component-tag
+          - name: dynamodb-table
+            providers:
+              - "aws"
             tags:
               component_tag: component-tag
 
@@ -61,50 +73,31 @@ providers: &providers
         source: "hashicorp/terraform"
         required_version: "1.9.8"
         enabled: true
-  cloudflare: &cloudflare
-    config:
-      api_key: ${CLOUDFLARE_API_KEY:-secrets.cloudflare.api_key}
-      email: ${CLOUDFLARE_EMAIL:-secrets.cloudflare.email}
+  # cloudflare: &cloudflare
+  #   config:
+  #     api_key: ${CLOUDFLARE_API_KEY:-secrets.cloudflare.api_key}
+  #     email: ${CLOUDFLARE_EMAIL:-secrets.cloudflare.email}
+  #   version_constraints:
+  #     - name: cloudflare
+  #       source: "cloudflare/cloudflare"
+  #       required_version: "5.0.0-alpha1"
+  #       enabled: true
+  random: &random
+    config: {}  # No specific configuration needed for random provider
     version_constraints:
-      - name: cloudflare
-        source: "cloudflare/cloudflare"
-        required_version: "5.0.0-alpha1"
-        enabled: true
-  github: &github
-    config:
-      token: ${GITHUB_TOKEN_LOCAL:-secrets.github.token}
-      owner: ${GITHUB_OWNER:-secrets.github.owner}
-    version_constraints:
-      - name: github
-        source: "integrations/github"
-        required_version: "6.4.0"
-        enabled: true
-  namecheap: &namecheap
-    config:
-      api_key: ${NAMECHEAP_API_KEY:-secrets.namecheap.api_key}
-      user_name: ${NAMECHEAP_USERNAME:-secrets.namecheap.user_name}
-      api_user: ${NAMECHEAP_API_USER:-secrets.namecheap.api_user}
-      use_sandbox: ${NAMECHEAP_USE_SANDBOX:-true}
-    version_constraints:
-      - name: namecheap
-        source: "namecheap/namecheap"
-        required_version: "2.2.0"
+      - name: random
+        source: "hashicorp/random"
+        required_version: "3.6.3"
         enabled: true
 
 # Secrets Management
 secrets: &secrets
-  cloudflare:
-    api_key: ${CLOUDFLARE_API_KEY}
-    email: ${CLOUDFLARE_EMAIL}
-  github:
-    token: ${GITHUB_TOKEN}
-    owner: ${GITHUB_OWNER}
+  # cloudflare:
+  #   api_key: ${CLOUDFLARE_API_KEY}
+  #   email: ${CLOUDFLARE_EMAIL}
+  # github:
+  #   token: ${GITHUB_TOKEN}
+  #   owner: ${GITHUB_OWNER}
   aws:
     access_key_id: ${AWS_ACCESS_KEY_ID}
     secret_access_key: ${AWS_SECRET_ACCESS_KEY}
-  namecheap:
-    api_key: ${NAMECHEAP_API_KEY}
-    user_name: ${NAMECHEAP_USERNAME}
-    api_user: ${NAMECHEAP_API_USER}
-    use_sandbox: ${NAMECHEAP_USE_SANDBOX}
-

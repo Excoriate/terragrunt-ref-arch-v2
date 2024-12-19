@@ -94,6 +94,14 @@ crash.log
 crash.*.log
 .infra-cache
 .infra-cache/*
-infractl
 .infractl-cache
 .infractl-cache/*
+
+tools/infractl/target/*
+**/*.exe
+**/*.exe~
+**/*.dll
+**/*.so
+**/*.dylib
+**/*.out
+

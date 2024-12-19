@@ -2,7 +2,7 @@ locals {
   # Dynamically load the configuration JSON file from the environment variable
   default_env_config_json_path = "${get_repo_root()}/infra/.infractl-cache/test.json"
   env_config_json_path = get_env("INFRACTL_CONFIG_JSON_PATH", local.default_env_config_json_path)
-  
+
   # Ensure the file exists and is readable
   config_file = jsondecode(file(local.env_config_json_path))
 
@@ -24,7 +24,6 @@ locals {
   # Git Configuration
   git = {
     base_url = local.config_file.git.base_url
-    terraform_modules_local_path = local.config_file.git.terraform_modules_local_path
   }
 
   # Infrastructure as Code Configuration
