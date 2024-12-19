@@ -49,18 +49,6 @@ locals {
   # 📋 Configuration Aggregation
   # Reads configuration from different hierarchical levels to build a comprehensive input set
   component_cfg = read_terragrunt_config("${get_terragrunt_dir()}/component.hcl")
-  layer_cfg = read_terragrunt_config("${find_in_parent_folders("layer.hcl")}")
-  stack_cfg = read_terragrunt_config("${find_in_parent_folders("stack.hcl")}")
-
-  # 🏗️ Hierarchical Input Resolution
-  # Consolidates inputs from multiple infrastructure levels
-  # Provides a flexible, layered configuration approach
-
-  # 🌐 Stack-Level Inputs: Broad, overarching configuration for the entire stack
-  stack_inputs = local.stack_cfg.locals.stack_inputs
-
-  # 🏢 Layer-Level Inputs: Configuration specific to the infrastructure layer
-  layer_inputs = local.layer_cfg.locals.layer_inputs
 
   # 🧩 Component-Level Inputs: Granular, specific configuration for this component
   component_inputs = local.component_cfg.locals.component_inputs
