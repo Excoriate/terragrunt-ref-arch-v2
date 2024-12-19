@@ -24,24 +24,26 @@ install:
 clean-ds:
     find . -name '.DS_Store' -type f -delete
 
-# Terragrunt plan blueprint
-plan:
-    #!/usr/bin/env bash
-    echo "Planning Terragrunt blueprint for environment"
-    export TG_ENV=local && cd infra/terragrunt/stack-landing-zone && terragrunt run-all plan
-
 build-cli:
     @echo "Building InfraCTL CLI 👨🏻‍💻"
-    @cd tools/infractl && go build -o infractl main.go
+    @cd tools/infractl && go build -o target/infractl main.go
 
 run-cli *ARGS: build-cli
     @echo "Running InfraCTL CLI 👨🏻‍💻 with args: {{ARGS}}"
-    @./tools/infractl/infractl {{ARGS}}
+    @./tools/infractl/target/infractl {{ARGS}}
 
 tg-clean:
     @echo "Cleaning Terragrunt cache for all environments"
     @cd infra/terragrunt && find . -type d -name ".terragrunt-cache" -exec rm -rf {} +
 
-tg-plan stack='landing-zone' layer='dns' component='dns-zone':
+tg-plan stack='stack-datastore' layer='db' component='quota-generator':
     @echo "Planning Terragrunt blueprint for environment"
-    @ cd infra/terragrunt/stack-{{stack}}/{{layer}}/{{component}} && terragrunt plan
+    @cd infra/terragrunt/{{stack}}/{{layer}}/{{component}} && terragrunt plan
+
+tg-datastore-db cmd='plan':
+    @echo "Planning Terragrunt blueprint for environment"
+    @cd infra/terragrunt/stack-datastore/db && terragrunt run-all {{cmd}} --terragrunt-non-interactive
+
+tg-plan-demo component='quota-generator':
+    @echo "Planning Terragrunt blueprint for environment"
+    @cd infra/terragrunt/stack-datastore/db/{{component}} && terragrunt plan
