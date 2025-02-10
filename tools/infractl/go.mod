@@ -3,7 +3,7 @@ module github.com/Excoriate/terragrunt-ref-arch-v2/tools/infractl
 go 1.23.3
 
 require (
-	github.com/alecthomas/kong v1.5.1
+	github.com/alecthomas/kong v1.8.0
 	github.com/charmbracelet/log v0.4.0
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/google/uuid v1.6.0
